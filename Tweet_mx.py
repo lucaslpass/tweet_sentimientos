@@ -9,12 +9,13 @@ import snscrape.modules.twitter as sn_twitter
 
 class Tweet_mx:
     
-    def __init__(self ,text = "" , user_name = "" ,since = "", until = "", retweet = "" , replies = "" ) :
+    def __init__(self ,text = "" , user_name = "",geocode = "" ,since = "", until = "", retweet = "" , replies = "" ) :
         
         self.querry= ""
         self.text  =text
         self.lang  = ":es"
         self.user_name = user_name
+        self.geocode = geocode
         self.since =since
         self.until = until
         self.retweet = retweet
@@ -24,6 +25,8 @@ class Tweet_mx:
         self.text=text    
     def set_user_name(self,user_name):
         self.user_name=user_name    
+    def set_geocode(self,geocode):
+        self.user_name=geocode     
     def set_since(self,since):
         self.since=since  
     def set_until(self,until):
@@ -36,7 +39,9 @@ class Tweet_mx:
     def get_text(self):
         return self.text    
     def get_user_name(self):
-        return self.user_name    
+        return self.user_name
+    def get_geocode(self):
+        return self.geocode       
     def get_since(self):
         return self.since  
     def get_until(self):
@@ -56,6 +61,11 @@ class Tweet_mx:
         if self.user_name !='': 
 
             q += f" from:{self.user_name}" 
+        if self.geocode != '':
+            mxdf ='19.42847 ,  -99.12766, 500km'
+            q+= f"geocode:{mxdf}"
+        else:
+            q+= f"geocode:{self.geocode}"             
 
         if self.until =='': 
 
