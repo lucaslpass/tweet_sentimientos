@@ -38,11 +38,11 @@ class Bd :
                                                  password=self.passwoord)
             if self.connection.is_connected():
                 db_Info = self.connection.get_server_info()
-                print("Connected to MySQL Server version ", db_Info)
+                #print("Connected to MySQL Server version ", db_Info)
                 cursor = self.connection.cursor()
                 cursor.execute("select database();")
                 record = cursor.fetchone()
-                print("You're connected to database: ", record)
+                #print("You're connected to database: ", record)
 
         except Error as e:
             print("Error while connecting to MySQL", e)
@@ -52,16 +52,15 @@ class Bd :
             self.get_connection() 
 
             mySql_Create_Table_Query = """CREATE TABLE IF NOT EXISTS TweetDB (
-                                IdTweet int(45)                        NOT NULL,
+                                Id      int(90)                        AUTO_INCREMENT,
+                                IdTweet varchar(90)                    NOT NULL,
                                 Tweet varchar(290)                     NOT NULL,
                                 Username varchar(45)                   NOT NULL,
                                 Hashtags varchar(120)                  NOT NULL,
                                 Datetime datetime                      NOT NULL,
-                                Retweets int(10)                       NOT NULL,
-                                Favourites int(10)                     NOT NULL,
                                 Rango varchar(45)                          NULL,
                                 Score float(11)                            NULL,
-                                PRIMARY KEY (idTweet)
+                                PRIMARY KEY (Id)
                                 );
                                 """
             cursor = self.connection.cursor()
@@ -94,10 +93,9 @@ class Bd :
                 cursor.close()
  
 
-    def insert(self,idTweet,tweet ,username , hashtags ,fecha , retweets ,favourites  ):
+    def insert(self,idTweet,tweet ,username , hashtags ,fecha  ):
         try:
             self.get_connection()
-            hashtags_str = ",".join(hashtags)
 
             cursor = self.connection.cursor()               
             mySql_insert_query = """INSERT INTO TweetDB ( 
@@ -105,14 +103,11 @@ class Bd :
                                     Tweet ,
                                     Username ,
                                     Hashtags ,
-                                    Datetime , 
-                                    Retweets ,
-                                    Favourites 
-                                     
+                                    Datetime          
                                     ) 
-                                    VALUES (%s , %s , %s , %s , %s , %s , %s  ) """
+                                    VALUES (%s , %s , %s , %s , %s  ) """
 
-            record = (int(idTweet),tweet ,username ,hashtags_str  , datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S'), int(retweets) ,int(favourites  ))
+            record = (int(idTweet),tweet ,username ,hashtags  , datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S'))
             cursor.execute(mySql_insert_query, record)
             self.connection.commit()
             print("Record inserted successfully into TweetDB table")
@@ -127,16 +122,16 @@ class Bd :
                 print("MySQL connection is closed")
    
    
-    def update(self, idTweet, rango , score ):
+    def update(self, id , rango , score ):
         try:
             self.get_connection()
             cursor = self.connection.cursor()               
-            mySql_insert_query = """Update TweetDB set Rango = %s,set Score = %s where IdTweet = %s """
+            mySql_insert_query = """Update TweetDB set Rango = %s, Score = %s where Id = %s"""
 
-            record = (   rango  , score , idTweet  )
+            record = (  rango  , float(score) ,int(id))
             cursor.execute(mySql_insert_query, record)
             self.connection.commit()
-            print("Record inserted successfully into TweetDB table")
+            #print("Record inserted successfully into TweetDB table")
 
         except mysql.connector.Error as error:
             print("Failed to insert into MySQL table {}".format(error))
@@ -145,17 +140,59 @@ class Bd :
             if self.connection.is_connected():
                 cursor.close()
                 self.connection.close()
-                print("MySQL connection is closed")
-   
+                #print("MySQL connection is closed")
 
-    def export_tweet(self):
+    def get_hashtags(self):
         try:
             self.get_connection()
-            sql_select_Query = "select * from TweetDB"
+            sql_Query = "SELECT DISTINCT Hashtags FROM TweetDB"
             cursor = self.connection.cursor()
-            cursor.execute(sql_select_Query)
+            cursor.execute(sql_Query)
             # get all records
             records = cursor.fetchall()
+
+            hashtags = []
+            for record in records:
+                hashtags.extend(record[0].split())
+
+            return hashtags
+
+        except mysql.connector.Error as e:
+            print("Error reading data from MySQL table", e)
+        finally:
+            if self.connection.is_connected():
+                self.connection.close()
+                cursor.close()
+                #print("MySQL connection is closed")            
+
+    def get_tweet(self, id ,hastag):
+        try:
+            self.get_connection()
+            sql_Query ="SELECT Id, Tweet, Username FROM TweetDB WHERE Hashtags = %s AND Id = %s LIMIT 1"
+            cursor = self.connection.cursor()
+            cursor.execute(sql_Query, (hastag,id))
+            # get the first record
+            record = cursor.fetchone()
+
+            return record
+
+        except mysql.connector.Error as e:
+            print("Error reading data from MySQL table", e)
+        finally:
+            if self.connection.is_connected():
+                self.connection.close()
+                cursor.close()
+                #print("MySQL connection is closed")
+
+    def count_tweets(self, hastag):
+        try:
+            self.get_connection()
+            count_Query = "SELECT COUNT(*) FROM TweetDB WHERE Hashtags = %s"
+            cursor = self.connection.cursor()
+            cursor.execute(count_Query, (hastag,))
+            count_result = cursor.fetchone()[0]
+
+            return count_result
 
         except mysql.connector.Error as e:
             print("Error reading data from MySQL table", e)
@@ -164,5 +201,23 @@ class Bd :
                 self.connection.close()
                 cursor.close()
                 print("MySQL connection is closed")
-                return records
-                 
+    
+    
+    def get_first_tweet_id(self, hastag):
+        try:
+            self.get_connection()
+            tweet_Query = "SELECT Id FROM TweetDB WHERE Hashtags = %s LIMIT 1"
+            cursor = self.connection.cursor()
+            cursor.execute(tweet_Query, (hastag,))
+            tweet_result = cursor.fetchone()[0]
+
+            return tweet_result
+
+        except mysql.connector.Error as e:
+            print("Error reading data from MySQL table", e)
+        finally:
+            if self.connection.is_connected():
+                self.connection.close()
+                cursor.close()
+                print("MySQL connection is closed")
+

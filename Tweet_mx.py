@@ -10,20 +10,24 @@ import pandas as pd
 
 class Tweet_mx:
     
-    def __init__(self ,text = "" , user_name = "" ,since = '', until = "", geocode = "",retweet = "" , replies = "" ) :
+    def __init__(self ,hashtag = "" , user_name = "" ,since = '', until = "", geocode = "",retweet = "" , replies = "" , path = "",folder = "") :
         
-        self.querry= ""
-        self.text  =text
-        self.lang  = "es"
-        self.user_name = user_name
-        self.since =since
-        self.until = until
-        self.geocode = geocode
-        self.retweet = retweet
-        self.replies = replies
+        self.querry     =    ""
+        self.path       =    path
+        self.folder     =    folder   
+        self.hashtag    =    hashtag
+        self.lang       =    "es"
+        self.user_name  =    user_name
+        self.since      =    since
+        self.until      =    until
+        self.geocode    =    geocode
+        self.retweet    =    retweet
+        self.replies    =    replies
     
-    def set_text(self,text):
-        self.text=text    
+    def set_folder(self,folder):
+        self.folder=folder
+    def set_hashtag(self,hashtag):
+        self.hashtag=hashtag    
     def set_user_name(self,user_name):
         self.user_name=user_name         
     def set_since(self,since):
@@ -37,14 +41,18 @@ class Tweet_mx:
     def set_replies(self,replies):
         self.replies=replies
     
-    def get_text(self):
-        return self.text    
+    def get_folder(self):
+        return self.folder
+    def get_hashtag(self):
+        return self.hashtag    
     def get_user_name(self):
         return self.user_name
     def get_since(self):
         return self.since  
     def get_until(self):
         return self.until
+    def get_lang(self):
+        return self.lang
     def get_geocode(self):
         return self.geocode       
     def get_retweet(self):
@@ -54,29 +62,32 @@ class Tweet_mx:
     def get_querry(self):
         self.set_querry()
         return self.querry
+    def get_path(self):
+        self.set_path()
+        return self.path
     
     def set_querry(self): 
 
-        q  = self.text 
-        q += f" lang:{self.lang}"      
-        if self.user_name !='': 
+        q  = self.get_hashtag() 
+        q += f" lang:{self.get_lang()}"      
+        if self.get_user_name() !='': 
 
-            q += f" from:{self.user_name}"              
+            q += f" from:{self.get_user_name()}"              
 
-        if self.until =='': 
+        if self.get_until() =='': 
 
-            self.until = datetime.datetime.strftime(datetime.date.today(), '%Y-%m-%d') 
+            self.set_until(datetime.datetime.strftime(datetime.date.today(), '%Y-%m-%d')) 
 
-        q += f" until:{self.until}" 
+        q += f" until:{self.get_until()}" 
 
-        if self.since =='': 
+        if self.get_since() =='': 
 
-            self.since = datetime.datetime.strftime(datetime.datetime.strptime(self.until, '%Y-%m-%d') -  datetime.timedelta(days=1), '%Y-%m-%d') 
+            self.set_since(datetime.datetime.strftime(datetime.datetime.strptime(self.until, '%Y-%m-%d') -  datetime.timedelta(days=1), '%Y-%m-%d') ) 
         else:  
-            q += f" since:{self.since}"
+            q += f" since:{self.get_since()}"
         
         if self.get_geocode() !="":    
-            q+=f' geocode:{self.geocode}'      
+            q+=f' geocode:{self.get_geocode()}'      
    
         q += f" exclude:retweets" 
      
@@ -84,13 +95,20 @@ class Tweet_mx:
 
         self.querry = q   
      
+    def set_path( self):
+        path=self.get_folder()
+        path+=f'{self.get_hashtag()}_{self.get_until()}.csv'
+        self.path = path
+        
+   
+   
     def extraer_tweets( self, cont, entero ):
         
         tweets=[]
         
-        for tweet in sn_twitter.TwitterSearchScraper(self.get_querry()).get_items():
+        for i,tweet in enumerate  (sn_twitter.TwitterSearchScraper(self.get_querry()).get_items()):
         
-            if len(tweets)== cont:
+            if i== cont:
                 break
             if entero == 1:     
                 tweets.append(tweet)
