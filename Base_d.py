@@ -168,7 +168,7 @@ class Bd :
     def get_tweet(self, id ,hastag):
         try:
             self.get_connection()
-            sql_Query ="SELECT Id, Tweet, Username FROM TweetDB WHERE Hashtags = %s AND Id = %s LIMIT 1"
+            sql_Query ="SELECT Id, Tweet, Username, Rango, Score FROM TweetDB WHERE Hashtags = %s AND Id = %s LIMIT 1"
             cursor = self.connection.cursor()
             cursor.execute(sql_Query, (hastag,id))
             # get the first record
@@ -183,6 +183,26 @@ class Bd :
                 self.connection.close()
                 cursor.close()
                 #print("MySQL connection is closed")
+
+    def get_Id_tweet(self, id ):
+        try:
+            self.get_connection()
+            sql_Query ="SELECT Id, Tweet, Username, Hashtags,Rango,Score  FROM TweetDB WHERE Id = %s LIMIT 1"
+            cursor = self.connection.cursor()
+            cursor.execute(sql_Query, (id,))
+            # get the first record
+            record = cursor.fetchone()
+
+            return record
+
+        except mysql.connector.Error as e:
+            print("Error reading data from MySQL table", e)
+        finally:
+            if self.connection.is_connected():
+                self.connection.close()
+                cursor.close()
+                #print("MySQL connection is closed")
+
 
     def count_tweets(self, hastag):
         try:
@@ -201,9 +221,27 @@ class Bd :
                 self.connection.close()
                 cursor.close()
                 print("MySQL connection is closed")
+    def count_tweets_score_null(self):
+        try:
+            self.get_connection()
+            count_Query = "SELECT COUNT(*) FROM TweetDB WHERE Score IS Null "
+            cursor = self.connection.cursor()
+            cursor.execute(count_Query)
+            count_result = cursor.fetchone()[0]
+
+            return count_result
+
+        except mysql.connector.Error as e:
+            print("Error reading data from MySQL table", e)
+        finally:
+            if self.connection.is_connected():
+                self.connection.close()
+                cursor.close()
+                print("MySQL connection is closed")
     
     
-    def get_first_tweet_id(self, hastag):
+    
+    def get_first_tweet_hastag(self, hastag):
         try:
             self.get_connection()
             tweet_Query = "SELECT Id FROM TweetDB WHERE Hashtags = %s LIMIT 1"
@@ -221,3 +259,20 @@ class Bd :
                 cursor.close()
                 print("MySQL connection is closed")
 
+    def get_first_tweet_score_null(self):
+        try:
+            self.get_connection()
+            tweet_query = "SELECT Id FROM TweetDB WHERE Score IS NULL LIMIT 1"
+            cursor = self.connection.cursor()
+            cursor.execute(tweet_query)
+            tweet_result = cursor.fetchone()
+
+            return tweet_result[0] if tweet_result else None
+
+        except mysql.connector.Error as e:
+            print("Error reading data from MySQL table", e)
+        finally:
+            if self.connection.is_connected():
+                self.connection.close()
+                cursor.close()
+                print("MySQL connection is closed")
