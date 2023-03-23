@@ -16,7 +16,7 @@ class Tweet_mx:
         self.path       =    path
         self.folder     =    folder   
         self.hashtag    =    hashtag
-        self.lang       =    "es"
+        self.lang       =    "es-mx"
         self.user_name  =    user_name
         self.since      =    since
         self.until      =    until
