@@ -1,7 +1,7 @@
 from datetime import datetime
 import mysql.connector  
 from mysql.connector import Error
-
+import os
 
 class Bd :
     def __init__(self ,host= "" ,database= "", user= "", passwoord ="" ) :
@@ -46,6 +46,7 @@ class Bd :
 
         except Error as e:
             print("Error while connecting to MySQL", e)
+            os.system('clear')
    
     def create_dbs(self):
         try:
@@ -59,7 +60,7 @@ class Bd :
                                 Username varchar(45)                   NOT NULL,
                                 Hashtags varchar(120)                  NOT NULL,
                                 Datetime datetime                      NOT NULL,
-                                Score float(11)                            NULL,
+                                Score int(11)                            NULL,
                                 PRIMARY KEY (Id)
                                 );
                                 """
@@ -92,15 +93,15 @@ class Bd :
         try:
             self.get_connection() 
         
-            #sql_select_Query = "DROP TABLE IF EXISTS TweetDB1;"
-            #cursor = self.connection.cursor()
-            #cursor.execute(sql_select_Query)
-            #print("TweetDB1 Table deleted successfully ")            
-    
-            sql_select_Query = "DROP TABLE IF EXISTS HashtagDB1;"
+            sql_select_Query = "DROP TABLE IF EXISTS TweetDB1;"
             cursor = self.connection.cursor()
             cursor.execute(sql_select_Query)
-            print("HashtagDB1 Table deleted successfully ")            
+            print("TweetDB1 Table deleted successfully ")            
+
+            #sql_select_Query = "DROP TABLE IF EXISTS HashtagDB1;"
+            #cursor = self.connection.cursor()
+            #cursor.execute(sql_select_Query)
+            #print("HashtagDB1 Table deleted successfully ")            
     
         except mysql.connector.Error as e:
             print("Error deleting table from MySQL", e)
@@ -212,7 +213,7 @@ class Bd :
             cursor = self.connection.cursor()               
             mySql_insert_query = """Update TweetDB1 set  Score = %s where Id = %s"""
 
-            record = (  float(score) ,int(id))
+            record = ( score ,id)
             cursor.execute(mySql_insert_query, record)
             self.connection.commit()
             #print("Record inserted successfully into TweetDB table")
@@ -268,6 +269,26 @@ class Bd :
                 self.connection.close()
                 cursor.close()
                 #print("MySQL connection is closed")
+    
+    def get_tweets_h_s_d(self):
+        try:
+            self.get_connection()
+            sql_Query ="SELECT  Hashtags ,Score , Datetime  FROM TweetDB1 WHERE Score IS NOT NULL "
+            cursor = self.connection.cursor()
+            cursor.execute(sql_Query)
+            # get the first record
+            record = cursor.fetchall()
+
+            return record
+
+        except mysql.connector.Error as e:
+            print("Error reading data from MySQL table", e)
+        finally:
+            if self.connection.is_connected():
+                self.connection.close()
+                cursor.close()
+                #print("MySQL connection is closed")
+
 
     def get_tweets_by_hashtag(self, hashtag):
         try:
@@ -341,7 +362,7 @@ class Bd :
     def get_score_tweet(self ):
         try:
             self.get_connection()
-            sql_Query ="SELECT  Hashtags , Score FROM TweetDB1 WHERE Score IS NOT NULL"
+            sql_Query ="SELECT  Hashtags , Score FROM TweetDB1 "
             cursor = self.connection.cursor()
             cursor.execute(sql_Query)
             #print("MySQL connection is closed")

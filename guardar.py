@@ -1,7 +1,6 @@
-import csv 
+from transformers import pipeline
 from Base_d import Bd
-import os
-import time
+
 import pandas as pd
 
 

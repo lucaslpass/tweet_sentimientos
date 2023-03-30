@@ -13,7 +13,6 @@ class Tweet_mx:
     def __init__(self ,hashtag = "" , user_name = "" ,since = '', until = "", geocode = "",retweet = "" , replies = "" , path = "",folder = "") :
         
         self.querry     =    ""
-        self.path       =    path
         self.folder     =    folder   
         self.hashtag    =    hashtag
         self.lang       =    "es-mx"

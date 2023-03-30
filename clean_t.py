@@ -46,6 +46,9 @@ def clean_sig(text):
 def date_clean(date):
     date_clean = date.split("+")[0]
     return date_clean
+def score_clean(date):
+    date_clean = date.split(" ")[0]
+    return date_clean
 
 def tweet_clean_links(tweet):
 
@@ -57,6 +60,7 @@ def tweet_clean_links(tweet):
 def tweet_clean_caracters(tweet):
     tweet_clean_caracters= re.sub(r'[@#](\w+)', r'\1', tweet)
     return tweet_clean_caracters
+    
 
 
 
